@@ -22,44 +22,13 @@
 #include <stdlib.h>
 #include "config.h"
 
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif  /* HAVE_SYS_TYPES_H */
 
-#if HAVE_ERRNO_H
 #include <errno.h>
-#endif  /* HAVE_ERRNO_H */
 
-#if HAVE_MEMORY_H
 #include <memory.h>
-#endif  /* HAVE_MEMORY_H */
 
-#if !HAVE_MALLOC
-#undef malloc
-void *
-rpl_malloc(size_t n)
-{
-    if(n == 0) {
-        n = 1;
-    }
-    return (void *)malloc(n);
-}
-#endif /* !HAVE_MALLOC */
 
-#if !HAVE_REALLOC
-#undef realloc
-void *
-rpl_realloc(void *p, size_t n)
-{
-    if (n == 0) {
-        n = 1;
-    }
-    if (p == 0) {
-        return malloc(n);
-    }
-    return (void *)realloc(p, n);
-}
-#endif /* !HAVE_REALLOC */
 
 #if 0
 int

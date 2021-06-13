@@ -1,0 +1,227 @@
+project('libsixel', ['c'], version: '1.9.0', license: 'MIT', default_options: ['buildtype=release', 'c_std=c99', 'warning_level=3'])
+
+if (get_option('pkgconfigdir') == '')
+  pkgconfigdir = '@libdir@/pkgconfig'
+else
+  pkgconfigdir = get_option('pkgconfigdir')
+endif
+
+if (get_option('bashcompletiondir') == '')
+  bashcompletiondir = '@datadir@/bash-completion/completions'
+else
+  bashcompletiondir = get_option('bashcompletiondir')
+endif
+
+if (get_option('zshcompletiondir') == '')
+  zshcompletiondir = '@datadir@/zsh/site-functions'
+else
+  zshcompletiondir = get_option('zshcompletiondir')
+endif
+
+libsixel_deps = []
+
+cc = meson.get_compiler('c')
+
+if host_machine.system() == 'linux'
+  message('Not on BSD, checking for libbsd.so')
+  has_bsd = cc.find_library('bsd')
+  cc.has_header('bsd/unistd.h')
+  libsixel_deps += [has_bsd]
+endif
+
+cc.has_function('unreachable')
+
+conf_data = configuration_data({'_POSIX_C_SOURCE': '199309L'})
+
+if cc.compiles('''
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic pop
+    #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    __attribute__((deprecated)) void test(void) {}
+''')
+  conf_data.set('HAVE_DIAGNOSTIC_DEPRECATED_DECLARATIONS', true)
+endif
+
+c_args = [
+  '-Wformat=2',
+  '-Wsign-conversion',
+  '-Wuninitialized',
+  '-Wstrict-overflow',
+  '-Wshadow',
+  '-Wdouble-promotion',
+  '-Wswitch-default',
+  '-Wunused-function',
+  '-Wunused-but-set-variable',
+  '-Bsymbolic',
+]
+
+foreach a : c_args
+  cc.has_argument(a)
+endforeach
+
+add_global_arguments(c_args, language: 'c')
+
+if get_option('gcov').enabled()
+  add_global_arguments('--coverage', language: 'c')
+  add_global_link_arguments('--coverage', language: 'c')
+endif
+
+
+libm_found = cc.find_library('m')
+libsixel_deps += [libm_found]
+
+needed_headers = [
+  'assert.h',
+  'math.h',
+  'ctype.h',
+  'memory.h',
+  'string.h',
+  'unistd.h',
+  'stdint.h',
+  'sys/unistd.h',
+  'getopt.h',
+  'sys/types.h',
+  'sys/stat.h',
+  'fcntl.h',
+  'sys/io.h',
+  'errno.h',
+  'limits.h',
+  'sys/time.h',
+  'time.h',
+  'signal.h',
+  'sys/select.h',
+  'sys/signal.h',
+  'termios.h',
+  'sys/ioctl.h',
+  'inttypes.h'
+]
+
+cc.has_function('malloc')
+cc.has_function('realloc')
+cc.has_function('memset')
+have_getopt_long = cc.has_function('getopt_long')
+
+needed_functions = [
+  'memcpy',
+  'memmove',
+  'memset',
+  'setmode',
+  'signal',
+  'nanosleep',
+  'strdup',
+  'strtoul',
+  'calloc',
+  'clock',
+  'clearerr',
+  'stat',
+  'setjmp',
+  'longjmp',
+  'strerror',
+  'isatty',
+  'strncmp',
+  'ldiv',
+  'floor',
+  'localeconv',
+  'pow',
+  'select',
+  'sqrt',
+  'strchr',
+  'strerror',
+  'strstr',
+  'strtol',
+  'pow'
+]
+
+foreach a : needed_headers
+  assert(cc.has_header(a), 'Needed header not found')
+endforeach
+
+foreach a : needed_functions
+  assert(cc.has_function(a, args: ['-lbsd']), 'Needed function not found')
+endforeach
+
+gdkpixbuf2_found = dependency('gdk-pixbuf-2.0', required: get_option('gdk-pixbuf2'))
+gd_found = cc.find_library('gd', required: get_option('gd'))
+curl_found = dependency('libcurl', required: get_option('libcurl'))
+jpeg_found = dependency('libjpeg', required: get_option('jpeg'))
+png_found = dependency('libpng', required: get_option('png'))
+python2_found = dependency('python2', required: get_option('python2'))
+
+if get_option('libcurl').enabled() and curl_found.found()
+  conf_data.set('HAVE_LIBCURL', true)
+  libsixel_deps += [curl_found]
+endif
+
+if get_option('jpeg').enabled() and jpeg_found
+  conf_data.set('HAVE_JPEG', true)
+  libsixel_deps += [jpeg_found]
+endif
+
+if get_option('png').enabled() and png_found
+  conf_data.set('HAVE_PNG', true)
+  libsixel_deps += [png_found]
+endif
+
+if get_option('python2').enabled() and python2_found.found()
+  conf_data.set('HAVE_PYTHON', true)
+  libsixel_deps += [python2_found]
+endif
+
+loaders = ['stb-image']
+
+if get_option('gd').enabled() and gd_found.found()
+  conf_data.set('HAVE_GD', true)
+  libsixel_deps += [gd_found]
+  loaders += ['gd']
+
+  gd_funcs = [
+    'gdImageCreateFromGifPtr', 'gdImageCreateFromPngPtr',
+    'gdImageCreateFromBmpPtr', 'gdImageCreateFromJpegPtrEx',
+    'gdImageCreateFromJpegPtr', 'gdImageCreateFromWBMPPtr',
+    'gdImageCreateFromTiffPtr', 'gdImageCreateFromGd2Ptr',
+    'gdImagePaletteToTrueColor'
+  ]
+
+  foreach f : gd_funcs
+    if cc.has_function(f, dependencies: gd_found)
+      conf_data.set('HAVE_DECL_@0@'.format(f.to_upper()), true)
+    endif
+  endforeach
+endif
+
+if get_option('gdk-pixbuf2').enabled() and gdkpixbuf2_found.found()
+  conf_data.set('HAVE_GDK_PIXBUF2', true)
+  libsixel_deps += [gdkpixbuf2_found]
+  loaders += ['gdk-pixbuf2']
+endif
+
+if have_getopt_long
+  conf_data.set('HAVE_GETOPT_LONG', true)
+endif
+
+configure_file(output: 'config.h', configuration: conf_data)
+install_headers('config.h')
+inc_config = include_directories('.')
+
+subdir('include')
+subdir('src')
+subdir('converters')
+subdir('tools')
+
+message('''
+
+libsixel was configured as follows
+
+       Install prefix      : @7@
+       Loader component    : @5@
+       libcurl integration : @6@
+       pkg-config dir      : @0@
+       Bash completion dir : @1@
+       Zsh completion dir  : @2@
+       python bindings     : @3@
+       gcov integration    : @8@
+       build type          : @4@
+       tests               : @9@
+
+
+'''.format(pkgconfigdir, bashcompletiondir, zshcompletiondir, ', '.join([python2_found.found().to_string(), python2_found.version()]), get_option('buildtype'), ' '.join(loaders), curl_found.found(), get_option('prefix'), get_option('gcov').enabled(), get_option('tests').enabled()))

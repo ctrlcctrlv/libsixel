@@ -22,17 +22,9 @@
 #ifndef MALLOC_STUB_H
 #define MALLOC_STUB_H
 
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif  /* HAVE_SYS_TYPES_H */
 
-#if !HAVE_MALLOC
-void * rpl_malloc(size_t n);
-#endif /* !HAVE_MALLOC */
 
-#if !HAVE_REALLOC
-void * rpl_realloc(void *p, size_t n);
-#endif /* !HAVE_REALLOC */
 
 #if 0
 int rpl_posix_memalign(void **memptr, size_t alignment, size_t size);

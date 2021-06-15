@@ -29,7 +29,6 @@
 # include <memory.h>
 
 #include "allocator.h"
-#include "malloc_stub.h"
 
 /* create allocator object */
 SIXELSTATUS

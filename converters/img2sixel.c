@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2021 libsixel developers. See `AUTHORS`.
  * Copyright (c) 2014-2018 Hayaki Saito
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -20,7 +21,6 @@
  */
 
 #include "config.h"
-#include "malloc_stub.h"
 
 #include <stdio.h>
 #include <stdlib.h>

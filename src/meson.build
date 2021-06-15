@@ -21,4 +21,4 @@ sources = [
   'writer.c'
 ]
 
-libsixel = shared_library('sixel', sources, include_directories: [inc, inc_config], dependencies: libsixel_deps)
+libsixel = shared_library('sixel', sources, include_directories: [inc, inc_config], dependencies: libsixel_deps, install: true)

@@ -126,10 +126,8 @@ needed_functions = [
   'select',
   'sqrt',
   'strchr',
-  'strerror',
   'strstr',
   'strtol',
-  'pow'
 ]
 
 foreach a : needed_headers

@@ -223,3 +223,5 @@ libsixel was configured as follows
 
 
 '''.format(pkgconfigdir, bashcompletiondir, zshcompletiondir, ', '.join([python2_installation.found().to_string(), python2_installation.dependency().version()]), get_option('buildtype'), ' '.join(loaders), curl_found.found(), get_option('prefix'), get_option('gcov').enabled(), get_option('tests').enabled()))
+
+warning('Perl, PHP and Ruby modules are available but not installed by Meson. If you want them, please refer to their individual installation directories for instructions after building libsixel.')

@@ -200,22 +200,33 @@ if get_option('python2').enabled() and python2_installation.found()
   subdir('python')
 endif
 
+warning('Perl, PHP and Ruby modules are available but not installed by Meson. If you want them, please refer to their individual installation directories for instructions after building libsixel.')
+
 message('''
 
 libsixel was configured as follows
 
-       Install prefix      : @7@
-       Loader component    : @5@
-       libcurl integration : @6@
-       pkg-config dir      : @0@
-       Bash completion dir : @1@
-       Zsh completion dir  : @2@
-       python bindings     : @3@
-       gcov integration    : @8@
-       build type          : @4@
+       Install prefix      : @0@
+       Loader component    : @1@
+       libcurl integration : @2@
+       pkg-config dir      : @3@
+       Bash completion dir : @4@
+       Zsh completion dir  : @5@
+       python bindings     : @6@
+       gcov integration    : @7@
+       build type          : @8@
        tests               : @9@
 
-
-'''.format(get_option('pkg_config_path'), bashcompletiondir, zshcompletiondir, ', '.join([python2_installation.found().to_string(), python2_installation.dependency().version()]), get_option('buildtype'), ' '.join(loaders), curl_found.found(), get_option('prefix'), get_option('gcov').enabled(), get_option('tests').enabled()))
-
-warning('Perl, PHP and Ruby modules are available but not installed by Meson. If you want them, please refer to their individual installation directories for instructions after building libsixel.')
+  '''.format(
+    get_option('prefix'),
+    ' '.join(loaders),
+    curl_found.found(),
+    get_option('pkg_config_path'),
+    bashcompletiondir,
+    zshcompletiondir,
+    ', '.join([python2_installation.found().to_string(), python2_installation.dependency().version()]),
+    get_option('gcov').enabled(),
+    get_option('buildtype'),
+    get_option('tests').enabled()
+  )
+)

@@ -372,11 +372,13 @@ You can use the following options at build time to influence the build. During t
 <td>png</td><td>`--with-png`</td><td>Whether to build with libpng support</td><td>Auto</td>
 <td>gcov</td><td>`--enable-gcov`</td><td>Build gcov coverage tests</td><td>No</td>
 <td>tests</td><td>`--enable-tests`</td><td>Build tests (requires `bash`)</td><td>No</td>
-<td>python2</td><td>`--enable-python`</td><td>Build Python library integration</td><td>Yes</td>
+<td>python2</td><td>`--enable-python`</td><td>Build Python library integration</td><td>No</td>
 <td>pkg\_config\_path</td><td>`--with-pkgconfigdir`</td><td>`pkg-config` search directory</td><td>Set by Meson</td>
 </table>
 
 As well, several directories can be configured, most importantly `prefix`. Non-standard directories you can change are `bashcompletiondir` and `zshcompletiondir`.
+
+Note: Before libsixel 2.0, Python was installed by default. This was disabled because it requires root on most systems for the Python module to be discoverable. Pass `-Dpython2=enabled` to install it.
 
 ## Usage of command line tools
 

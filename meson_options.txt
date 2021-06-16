@@ -8,7 +8,7 @@ option('png', type: 'feature', value: 'auto', description: 'Whether to parse png
 option('gcov', type: 'feature', value: 'disabled', description: 'Build gcov coverage tests')
 option('tests', type: 'feature', value: 'disabled', description: 'Build tests')
 
-option('python2', type: 'feature', value: 'enabled', description: 'Whether to enable Python library integration (2.x+)')
+option('python2', type: 'feature', value: 'disabled', description: 'Whether to enable Python library integration (2.x+)')
 
 option('bashcompletiondir', type: 'string', value: '', description: 'Use the specified bash completion dir. Default: $datadir/bash-completion/completions')
 option('zshcompletiondir', type: 'string', value: '', description: 'Use the specified zsh completion dir. Default: $datadir/zsh/site-functions')

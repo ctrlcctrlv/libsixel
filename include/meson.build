@@ -8,6 +8,8 @@ inc_conf_data.set('LS_LTVERSION', '@LS_LT_CURRENT@:@LS_LT_REVISION@:@LS_LT_AGE@'
 
 configure_file(input : 'sixel.h.in',
                output : 'sixel.h',
-               configuration : inc_conf_data)
-install_headers('sixel.h')
+               configuration : inc_conf_data,
+               install: true,
+               install_dir: get_option('includedir'))
+
 inc = include_directories('.')

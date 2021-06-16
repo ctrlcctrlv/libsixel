@@ -12,6 +12,7 @@ tools_conf_data.set('exec_prefix', get_option('bindir'))
 
 configure_file(input : 'libsixel-config.in',
                output : 'libsixel-config',
-               configuration : tools_conf_data)
-
-install_data('libsixel-config', install_dir: get_option('bindir'), install_mode: 'rwxr-xr-x')
+               configuration : tools_conf_data,
+               install: true,
+               install_dir: get_option('bindir'),
+               install_mode: 'rwxr-xr-x')

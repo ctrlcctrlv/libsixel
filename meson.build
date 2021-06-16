@@ -199,7 +199,6 @@ if have_getopt_long
 endif
 
 configure_file(output: 'config.h', configuration: conf_data)
-install_headers('config.h')
 inc_config = include_directories('.')
 
 subdir('include')

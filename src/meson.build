@@ -22,3 +22,5 @@ sources = [
 ]
 
 libsixel = shared_library('sixel', sources, include_directories: [inc, inc_config], dependencies: libsixel_deps, install: true)
+pkgconfig = import('pkgconfig')
+pkgconfig.generate(libsixel, name: 'libsixel', description: pkg_description, libraries: '-lsixel')

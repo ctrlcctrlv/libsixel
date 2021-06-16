@@ -224,7 +224,7 @@ libsixel was configured as follows
     get_option('pkg_config_path'),
     bashcompletiondir,
     zshcompletiondir,
-    ', '.join([python2_installation.found().to_string(), python2_installation.dependency().version()]),
+    python2_installation.found().to_string(),
     get_option('gcov').enabled(),
     get_option('buildtype'),
     get_option('tests').enabled()

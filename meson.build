@@ -1,11 +1,5 @@
 project('libsixel', ['c'], version: '1.9.0', license: 'MIT', default_options: ['buildtype=release', 'c_std=c99', 'warning_level=3'])
 
-if (get_option('pkgconfigdir') == '')
-  pkgconfigdir = '@libdir@/pkgconfig'
-else
-  pkgconfigdir = get_option('pkgconfigdir')
-endif
-
 datadir = get_option('datadir')
 if (get_option('bashcompletiondir') == '')
   bashcompletiondir = '@0@/bash-completion/completions'.format(datadir)
@@ -222,6 +216,6 @@ libsixel was configured as follows
        tests               : @9@
 
 
-'''.format(pkgconfigdir, bashcompletiondir, zshcompletiondir, ', '.join([python2_installation.found().to_string(), python2_installation.dependency().version()]), get_option('buildtype'), ' '.join(loaders), curl_found.found(), get_option('prefix'), get_option('gcov').enabled(), get_option('tests').enabled()))
+'''.format(get_option('pkg_config_path'), bashcompletiondir, zshcompletiondir, ', '.join([python2_installation.found().to_string(), python2_installation.dependency().version()]), get_option('buildtype'), ' '.join(loaders), curl_found.found(), get_option('prefix'), get_option('gcov').enabled(), get_option('tests').enabled()))
 
 warning('Perl, PHP and Ruby modules are available but not installed by Meson. If you want them, please refer to their individual installation directories for instructions after building libsixel.')

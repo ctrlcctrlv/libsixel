@@ -1,6 +1,6 @@
 inc_conf_data = configuration_data()
 
-inc_conf_data.set('PACKAGE_VERSION', '1.9.0')
+inc_conf_data.set('PACKAGE_VERSION', meson.project_version())
 LS_LT_CURRENT=1
 LS_LT_REVISION=9
 LS_LT_AGE=0

@@ -29,12 +29,13 @@
 #include <sixel.h>
 
 static void
-get_rgb(unsigned char const *data,
+get_rgba(unsigned char const *data,
         int const pixelformat,
         int depth,
         unsigned char *r,
         unsigned char *g,
-        unsigned char *b)
+        unsigned char *b,
+        unsigned char *a)
 {
     unsigned int pixels = 0;
 #if SWAP_BYTES
@@ -62,65 +63,79 @@ get_rgb(unsigned char const *data,
         *r = ((pixels >> 10) & 0x1f) << 3;
         *g = ((pixels >>  5) & 0x1f) << 3;
         *b = ((pixels >>  0) & 0x1f) << 3;
+        *a = 255;
         break;
     case SIXEL_PIXELFORMAT_RGB565:
         *r = ((pixels >> 11) & 0x1f) << 3;
         *g = ((pixels >>  5) & 0x3f) << 2;
         *b = ((pixels >>  0) & 0x1f) << 3;
+        *a = 255;
         break;
     case SIXEL_PIXELFORMAT_RGB888:
         *r = (pixels >> 16) & 0xff;
         *g = (pixels >>  8) & 0xff;
         *b = (pixels >>  0) & 0xff;
+        *a = 255;
         break;
     case SIXEL_PIXELFORMAT_BGR555:
         *r = ((pixels >>  0) & 0x1f) << 3;
         *g = ((pixels >>  5) & 0x1f) << 3;
         *b = ((pixels >> 10) & 0x1f) << 3;
+        *a = 255;
         break;
     case SIXEL_PIXELFORMAT_BGR565:
         *r = ((pixels >>  0) & 0x1f) << 3;
         *g = ((pixels >>  5) & 0x3f) << 2;
         *b = ((pixels >> 11) & 0x1f) << 3;
+        *a = 255;
         break;
     case SIXEL_PIXELFORMAT_BGR888:
         *r = (pixels >>  0) & 0xff;
         *g = (pixels >>  8) & 0xff;
         *b = (pixels >> 16) & 0xff;
+        *a = 255;
         break;
     case SIXEL_PIXELFORMAT_RGBA8888:
         *r = (pixels >> 24) & 0xff;
         *g = (pixels >> 16) & 0xff;
         *b = (pixels >>  8) & 0xff;
+        *a = (pixels >>  0) & 0xff;
         break;
     case SIXEL_PIXELFORMAT_ARGB8888:
         *r = (pixels >> 16) & 0xff;
         *g = (pixels >>  8) & 0xff;
         *b = (pixels >>  0) & 0xff;
+        *a = (pixels >> 24) & 0xff;
         break;
     case SIXEL_PIXELFORMAT_BGRA8888:
         *r = (pixels >>  8) & 0xff;
         *g = (pixels >> 16) & 0xff;
         *b = (pixels >> 24) & 0xff;
+        *a = (pixels >>  0) & 0xff;
         break;
     case SIXEL_PIXELFORMAT_ABGR8888:
         *r = (pixels >>  0) & 0xff;
         *g = (pixels >>  8) & 0xff;
         *b = (pixels >> 16) & 0xff;
+        *a = (pixels >> 24) & 0xff;
         break;
     case SIXEL_PIXELFORMAT_GA88:
         *r = *g = *b = (pixels >> 8) & 0xff;
+        *a = (pixels >> 0) & 0xff;
         break;
     case SIXEL_PIXELFORMAT_G8:
+        *r = *g = *b = (pixels >> 8) & 0xff;
+        *a = 255;
+        break;
     case SIXEL_PIXELFORMAT_AG88:
         *r = *g = *b = pixels & 0xff;
+        *a = (pixels >> 8) & 0xff;
         break;
     default:
-        *r = *g = *b = 0;
+        *r = *g = *b = *a = 0;
         break;
     }
 }
-
 
 SIXELAPI int
 sixel_helper_compute_depth(int pixelformat)
@@ -174,13 +189,13 @@ expand_rgb(unsigned char *dst,
     int y;
     int dst_offset;
     int src_offset;
-    unsigned char r, g, b;
+    unsigned char r, g, b, a;
 
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
             src_offset = depth * (y * width + x);
             dst_offset = 3 * (y * width + x);
-            get_rgb(src + src_offset, pixelformat, depth, &r, &g, &b);
+            get_rgba(src + src_offset, pixelformat, depth, &r, &g, &b, &a);
 
             *(dst + dst_offset + 0) = r;
             *(dst + dst_offset + 1) = g;
@@ -189,6 +204,31 @@ expand_rgb(unsigned char *dst,
     }
 }
 
+static void
+expand_rgba(unsigned char *dst,
+           unsigned char const *src,
+           int width, int height,
+           int pixelformat, int depth)
+{
+    int x;
+    int y;
+    int dst_offset;
+    int src_offset;
+    unsigned char r, g, b, a;
+
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            src_offset = depth * (y * width + x);
+            dst_offset = 4 * (y * width + x);
+            get_rgba(src + src_offset, pixelformat, depth, &r, &g, &b, &a);
+
+            *(dst + dst_offset + 0) = r;
+            *(dst + dst_offset + 1) = g;
+            *(dst + dst_offset + 2) = b;
+            *(dst + dst_offset + 3) = a;
+        }
+    }
+}
 
 static SIXELSTATUS
 expand_palette(unsigned char *dst, unsigned char const *src,
@@ -255,7 +295,7 @@ end:
 
 
 SIXELAPI SIXELSTATUS
-sixel_helper_normalize_pixelformat(
+sixel_helper_normalize_pixelformat_rgb(
     unsigned char       /* out */ *dst,             /* destination buffer */
     int                 /* out */ *dst_pixelformat, /* converted pixelformat */
     unsigned char const /* in */  *src,             /* source pixels */
@@ -324,6 +364,88 @@ end:
     return status;
 }
 
+SIXELAPI SIXELSTATUS
+sixel_helper_normalize_pixelformat_rgba(
+    unsigned char       /* out */ *dst,             /* destination buffer */
+    int                 /* out */ *dst_pixelformat, /* converted pixelformat */
+    unsigned char const /* in */  *src,             /* source pixels */
+    int                 /* in */  src_pixelformat,  /* format of source image */
+    int                 /* in */  width,            /* width of source image */
+    int                 /* in */  height)           /* height of source image */
+{
+    SIXELSTATUS status = SIXEL_FALSE;
+
+    switch (src_pixelformat) {
+    case SIXEL_PIXELFORMAT_G8:
+        expand_rgba(dst, src, width, height, src_pixelformat, 1);
+        *dst_pixelformat = SIXEL_PIXELFORMAT_RGBA8888;
+        break;
+    case SIXEL_PIXELFORMAT_RGB565:
+    case SIXEL_PIXELFORMAT_RGB555:
+    case SIXEL_PIXELFORMAT_BGR565:
+    case SIXEL_PIXELFORMAT_BGR555:
+    case SIXEL_PIXELFORMAT_GA88:
+    case SIXEL_PIXELFORMAT_AG88:
+        expand_rgba(dst, src, width, height, src_pixelformat, 2);
+        *dst_pixelformat = SIXEL_PIXELFORMAT_RGBA8888;
+        break;
+    case SIXEL_PIXELFORMAT_RGB888:
+    case SIXEL_PIXELFORMAT_BGR888:
+        expand_rgba(dst, src, width, height, src_pixelformat, 3);
+        *dst_pixelformat = SIXEL_PIXELFORMAT_RGBA8888;
+        break;
+    case SIXEL_PIXELFORMAT_RGBA8888:
+    case SIXEL_PIXELFORMAT_ARGB8888:
+    case SIXEL_PIXELFORMAT_BGRA8888:
+    case SIXEL_PIXELFORMAT_ABGR8888:
+        expand_rgba(dst, src, width, height, src_pixelformat, 4);
+        *dst_pixelformat = SIXEL_PIXELFORMAT_RGBA8888;
+        break;
+    case SIXEL_PIXELFORMAT_PAL1:
+    case SIXEL_PIXELFORMAT_PAL2:
+    case SIXEL_PIXELFORMAT_PAL4:
+        *dst_pixelformat = SIXEL_PIXELFORMAT_PAL8;
+        status = expand_palette(dst, src, width, height, src_pixelformat);
+        if (SIXEL_FAILED(status)) {
+            goto end;
+        }
+        break;
+    case SIXEL_PIXELFORMAT_G1:
+    case SIXEL_PIXELFORMAT_G2:
+    case SIXEL_PIXELFORMAT_G4:
+        *dst_pixelformat = SIXEL_PIXELFORMAT_G8;
+        status = expand_palette(dst, src, width, height, src_pixelformat);
+        if (SIXEL_FAILED(status)) {
+            goto end;
+        }
+        break;
+    case SIXEL_PIXELFORMAT_PAL8:
+        memcpy(dst, src, (size_t)(width * height));
+        *dst_pixelformat = src_pixelformat;
+        break;
+    default:
+        status = SIXEL_BAD_ARGUMENT;
+        goto end;
+    }
+
+    status = SIXEL_OK;
+
+end:
+    return status;
+}
+
+/* deprecated */
+SIXELAPI SIXELSTATUS
+sixel_helper_normalize_pixelformat(
+    unsigned char       /* out */ *dst,             /* destination buffer */
+    int                 /* out */ *dst_pixelformat, /* converted pixelformat */
+    unsigned char const /* in */  *src,             /* source pixels */
+    int                 /* in */  src_pixelformat,  /* format of source image */
+    int                 /* in */  width,            /* width of source image */
+    int                 /* in */  height)           /* height of source image */
+{
+    return sixel_helper_normalize_pixelformat_rgb(dst, dst_pixelformat, src, src_pixelformat, width, height);
+}
 
 #if HAVE_TESTS
 static int

@@ -1,8 +1,18 @@
 echo '[start]'
 
-test -z "$1"; HAVE_PNG=$?
-test -z "$2"; HAVE_CURL=$?
-test ! -z "$3"; BE_SILENT=$?
+response_code() { if [ $? -eq 0 ]; then echo 0; else echo 1; fi }
+
+if test ! -z "$1"; then
+    HAVE_PNG=true
+fi
+if test ! -z "$2"; then
+    HAVE_CURL=true
+fi
+if test ! -z "$3"; then
+    SILENT='> /dev/null'
+else
+    SILENT=''
+fi
 
 echo '[test1] invalid option handling'
 mkdir -p ${BUILDDIR}/tmp/
@@ -42,12 +52,6 @@ test ! $(echo -n a | ${BUILDDIR}/img2sixel)
 echo '[test3] print information'
 ${BUILDDIR}/img2sixel -H
 ${BUILDDIR}/img2sixel -V
-
-if [[ $BE_SILENT -eq 0 ]]; then
-    SILENT='> /dev/null'
-else
-    SILENT=''
-fi
 
 echo '[test4] conversion options'
 eval "${BUILDDIR}/img2sixel ${TOP_SRCDIR}/images/snake.jpg -datkinson -flum -saverage | ${BUILDDIR}/img2sixel | tee ${BUILDDIR}/tmp/snake.sixel $SILENT"
@@ -123,7 +127,7 @@ eval ${BUILDDIR}/img2sixel -S -datkinson ${TOP_SRCDIR}/images/seq2gif.gif $SILEN
 echo
 echo '[test8] progressive jpeg'
 eval ${BUILDDIR}/img2sixel ${TOP_SRCDIR}/images/snake-progressive.jpg $SILENT
-if test HAVE_PNG; then
+if test $HAVE_PNG; then
 echo
 echo '[test9] various PNG'
 eval ${BUILDDIR}/img2sixel ${TOP_SRCDIR}/images/pngsuite/basic/basn0g01.png $SILENT
@@ -190,7 +194,7 @@ eval ${BUILDDIR}/img2sixel -w32 -B\#fff ${TOP_SRCDIR}/images/pngsuite/background
 eval ${BUILDDIR}/img2sixel -w32 -B\#fff ${TOP_SRCDIR}/images/pngsuite/background/bgwn6a08.png $SILENT
 eval ${BUILDDIR}/img2sixel -w32 -B\#fff ${TOP_SRCDIR}/images/pngsuite/background/bgyn6a16.png $SILENT
 fi
-if test HAVE_CURL; then
+if test $HAVE_CURL; then
 echo
 echo '[test10] curl'
 test ! $(${BUILDDIR}/img2sixel file:///test)

@@ -276,6 +276,7 @@ load_png(unsigned char      /* out */ **result,
     png_color_16p default_background;
     int i;
     int depth;
+    int number_of_passes;
 
     if (setjmp(jmpbuf) != 0) {
         sixel_allocator_free(allocator, *result);
@@ -324,6 +325,7 @@ load_png(unsigned char      /* out */ **result,
     read_chunk.size = size;
 
     png_set_read_fn(png_ptr,(png_voidp)&read_chunk, read_png);
+    number_of_passes = png_set_interlace_handling(png_ptr);
     png_read_info(png_ptr, info_ptr);
     *psx = (int)png_get_image_width(png_ptr, info_ptr);
     *psy = (int)png_get_image_height(png_ptr, info_ptr);
@@ -607,7 +609,7 @@ cleanup:
 static SIXELSTATUS
 load_sixel(unsigned char        /* out */ **result,
            unsigned char        /* in */  *buffer,
-           int                  /* in */  size,
+           unsigned int         /* in */  size,
            int                  /* out */ *psx,
            int                  /* out */ *psy,
            unsigned char        /* out */ **ppalette,
@@ -794,7 +796,7 @@ load_with_builtin(
         }
         status = load_sixel(&frame->pixels,
                             pchunk->buffer,
-                            (int)pchunk->size,
+                            pchunk->size,
                             &frame->width,
                             &frame->height,
                             fuse_palette ? &frame->palette: NULL,
@@ -987,6 +989,7 @@ load_with_gdkpixbuf(
     if (!animation || fstatic || gdk_pixbuf_animation_is_static_image(animation)) {
         pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
         if (pixbuf == NULL) {
+            status = SIXEL_FALSE; // because reset by sixel_frame_new
             goto end;
         }
         frame->frame_no = 0;

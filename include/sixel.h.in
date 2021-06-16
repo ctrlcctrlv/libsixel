@@ -21,6 +21,7 @@
  */
 
 #include <stddef.h>  /* for size_t */
+#include <stdbool.h>
 
 #ifndef LIBSIXEL_SIXEL_H
 #define LIBSIXEL_SIXEL_H
@@ -802,11 +803,27 @@ sixel_encode(
     sixel_dither_t /* in */ *dither,     /* dither context */
     sixel_output_t /* in */ *context);   /* output context */
 
+typedef struct {
+    int          width;
+    int          height;
+    unsigned int ncolors;
+    bool         has_transparency;
+} sixel_info_t;
+
+SIXELAPI SIXELSTATUS
+sixel_decode_raw_rgba(
+    unsigned char     /* in */  *sixels,
+    unsigned int      /* in */  len,
+    unsigned char     /* out */ **pixels,
+    sixel_info_t      /* out */ *info,
+    sixel_allocator_t /* in */  *allocator
+);
+
 /* convert sixel data into indexed pixel bytes and palette data */
 SIXELAPI SIXELSTATUS
 sixel_decode_raw(
     unsigned char       /* in */  *p,           /* sixel bytes */
-    int                 /* in */  len,          /* size of sixel bytes */
+    unsigned int        /* in */  len,          /* size of sixel bytes */
     unsigned char       /* out */ **pixels,     /* decoded pixels */
     int                 /* out */ *pwidth,      /* image width */
     int                 /* out */ *pheight,     /* image height */
@@ -817,7 +834,7 @@ sixel_decode_raw(
 SIXELAPI __attribute__((deprecated)) SIXELSTATUS
 sixel_decode(
     unsigned char            /* in */  *sixels,    /* sixel bytes */
-    int                      /* in */  size,       /* size of sixel bytes */
+    unsigned int             /* in */  size,       /* size of sixel bytes */
     unsigned char            /* out */ **pixels,   /* decoded pixels */
     int                      /* out */ *pwidth,    /* image width */
     int                      /* out */ *pheight,   /* image height */
@@ -855,8 +872,30 @@ sixel_helper_compute_depth(
     int /* in */ pixelformat /* one of enum pixelFormat */
 );
 
+/* convert pixelFormat into PIXELFORMAT_RGBA8888 */
+SIXELAPI SIXELSTATUS
+sixel_helper_normalize_pixelformat_rgba(
+    unsigned char       /* out */ *dst,             /* destination buffer */
+    int                 /* out */ *dst_pixelformat, /* converted pixelformat */
+    unsigned char const /* in */  *src,             /* source pixels */
+    int                 /* in */  src_pixelformat,  /* format of source image */
+    int                 /* in */  width,            /* width of source image */
+    int                 /* in */  height            /* height of source image */
+);
+
 /* convert pixelFormat into PIXELFORMAT_RGB888 */
 SIXELAPI SIXELSTATUS
+sixel_helper_normalize_pixelformat_rgb(
+    unsigned char       /* out */ *dst,             /* destination buffer */
+    int                 /* out */ *dst_pixelformat, /* converted pixelformat */
+    unsigned char const /* in */  *src,             /* source pixels */
+    int                 /* in */  src_pixelformat,  /* format of source image */
+    int                 /* in */  width,            /* width of source image */
+    int                 /* in */  height            /* height of source image */
+);
+
+/* convert pixelFormat into PIXELFORMAT_RGB888 */
+SIXELAPI __attribute__((deprecated)) SIXELSTATUS
 sixel_helper_normalize_pixelformat(
     unsigned char       /* out */ *dst,             /* destination buffer */
     int                 /* out */ *dst_pixelformat, /* converted pixelformat */

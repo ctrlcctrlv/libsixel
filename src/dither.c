@@ -547,7 +547,7 @@ sixel_dither_initialize(
             goto end;
         }
 
-        status = sixel_helper_normalize_pixelformat(
+        status = sixel_helper_normalize_pixelformat_rgb(
             normalized_pixels,
             &pixelformat,
             data,
@@ -777,10 +777,10 @@ sixel_dither_apply_palette(
             status = SIXEL_BAD_ALLOCATION;
             goto end;
         }
-        status = sixel_helper_normalize_pixelformat(normalized_pixels,
-                                                    &dither->pixelformat,
-                                                    pixels, dither->pixelformat,
-                                                    width, height);
+        status = sixel_helper_normalize_pixelformat_rgb(normalized_pixels,
+                                                        &dither->pixelformat,
+                                                        pixels, dither->pixelformat,
+                                                        width, height);
         if (SIXEL_FAILED(status)) {
             goto end;
         }

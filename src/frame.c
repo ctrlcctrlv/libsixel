@@ -415,12 +415,12 @@ sixel_frame_convert_to_rgb888(sixel_frame_t /*in */ *frame)
         }
         src = normalized_pixels + frame->width * frame->height * 3;
         dst = normalized_pixels;
-        status = sixel_helper_normalize_pixelformat(src,
-                                                    &frame->pixelformat,
-                                                    frame->pixels,
-                                                    frame->pixelformat,
-                                                    frame->width,
-                                                    frame->height);
+        status = sixel_helper_normalize_pixelformat_rgb(src,
+                                                        &frame->pixelformat,
+                                                        frame->pixels,
+                                                        frame->pixelformat,
+                                                        frame->width,
+                                                        frame->height);
         if (SIXEL_FAILED(status)) {
             sixel_allocator_free(frame->allocator, normalized_pixels);
             goto end;
@@ -474,12 +474,12 @@ sixel_frame_convert_to_rgb888(sixel_frame_t /*in */ *frame)
             status = SIXEL_BAD_ALLOCATION;
             goto end;
         }
-        status = sixel_helper_normalize_pixelformat(normalized_pixels,
-                                                    &frame->pixelformat,
-                                                    frame->pixels,
-                                                    frame->pixelformat,
-                                                    frame->width,
-                                                    frame->height);
+        status = sixel_helper_normalize_pixelformat_rgb(normalized_pixels,
+                                                        &frame->pixelformat,
+                                                        frame->pixels,
+                                                        frame->pixelformat,
+                                                        frame->width,
+                                                        frame->height);
         if (SIXEL_FAILED(status)) {
             sixel_allocator_free(frame->allocator, normalized_pixels);
             goto end;
@@ -701,12 +701,12 @@ sixel_frame_clip(
     case SIXEL_PIXELFORMAT_G4:
         normalized_pixels = (unsigned char *)sixel_allocator_malloc(frame->allocator,
                                                                     (size_t)(frame->width * frame->height));
-        status = sixel_helper_normalize_pixelformat(normalized_pixels,
-                                                    &frame->pixelformat,
-                                                    frame->pixels,
-                                                    frame->pixelformat,
-                                                    frame->width,
-                                                    frame->height);
+        status = sixel_helper_normalize_pixelformat_rgb(normalized_pixels,
+                                                        &frame->pixelformat,
+                                                        frame->pixels,
+                                                        frame->pixelformat,
+                                                        frame->width,
+                                                        frame->height);
         if (SIXEL_FAILED(status)) {
             sixel_allocator_free(frame->allocator, normalized_pixels);
             goto end;

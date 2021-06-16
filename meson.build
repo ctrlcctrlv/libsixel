@@ -6,14 +6,15 @@ else
   pkgconfigdir = get_option('pkgconfigdir')
 endif
 
+datadir = get_option('datadir')
 if (get_option('bashcompletiondir') == '')
-  bashcompletiondir = '@datadir@/bash-completion/completions'
+  bashcompletiondir = '@0@/bash-completion/completions'.format(datadir)
 else
   bashcompletiondir = get_option('bashcompletiondir')
 endif
 
 if (get_option('zshcompletiondir') == '')
-  zshcompletiondir = '@datadir@/zsh/site-functions'
+  zshcompletiondir = '@0@/zsh/site-functions'.format(datadir)
 else
   zshcompletiondir = get_option('zshcompletiondir')
 endif
@@ -144,7 +145,7 @@ curl_found = dependency('libcurl', required: get_option('libcurl'))
 jpeg_found = dependency('libjpeg', required: get_option('jpeg'))
 png_found = dependency('libpng', required: get_option('png'))
 pymod = import('python')
-python2_found = pymod.find_installation('python2', required: get_option('python2'))
+python2_installation = pymod.find_installation('python2', required: get_option('python2'))
 
 if get_option('libcurl').enabled() and curl_found.found()
   conf_data.set('HAVE_LIBCURL', true)
@@ -159,11 +160,6 @@ endif
 if get_option('png').enabled() and png_found
   conf_data.set('HAVE_PNG', true)
   libsixel_deps += [png_found]
-endif
-
-if get_option('python2').enabled() and python2_found.found()
-  conf_data.set('HAVE_PYTHON', true)
-  libsixel_deps += [python2_found.dependency()]
 endif
 
 loaders = ['stb-image']
@@ -206,6 +202,10 @@ subdir('src')
 subdir('converters')
 subdir('tools')
 
+if get_option('python2').enabled() and python2_installation.found()
+  subdir('python')
+endif
+
 message('''
 
 libsixel was configured as follows
@@ -222,4 +222,4 @@ libsixel was configured as follows
        tests               : @9@
 
 
-'''.format(pkgconfigdir, bashcompletiondir, zshcompletiondir, ', '.join([python2_found.found().to_string(), python2_found.dependency().version()]), get_option('buildtype'), ' '.join(loaders), curl_found.found(), get_option('prefix'), get_option('gcov').enabled(), get_option('tests').enabled()))
+'''.format(pkgconfigdir, bashcompletiondir, zshcompletiondir, ', '.join([python2_installation.found().to_string(), python2_installation.dependency().version()]), get_option('buildtype'), ' '.join(loaders), curl_found.found(), get_option('prefix'), get_option('gcov').enabled(), get_option('tests').enabled()))

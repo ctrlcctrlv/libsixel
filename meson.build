@@ -143,7 +143,8 @@ gd_found = cc.find_library('gd', required: get_option('gd'))
 curl_found = dependency('libcurl', required: get_option('libcurl'))
 jpeg_found = dependency('libjpeg', required: get_option('jpeg'))
 png_found = dependency('libpng', required: get_option('png'))
-python2_found = dependency('python2', required: get_option('python2'))
+pymod = import('python')
+python2_found = pymod.find_installation('python2', required: get_option('python2'))
 
 if get_option('libcurl').enabled() and curl_found.found()
   conf_data.set('HAVE_LIBCURL', true)
@@ -162,7 +163,7 @@ endif
 
 if get_option('python2').enabled() and python2_found.found()
   conf_data.set('HAVE_PYTHON', true)
-  libsixel_deps += [python2_found]
+  libsixel_deps += [python2_found.dependency()]
 endif
 
 loaders = ['stb-image']
@@ -222,4 +223,4 @@ libsixel was configured as follows
        tests               : @9@
 
 
-'''.format(pkgconfigdir, bashcompletiondir, zshcompletiondir, ', '.join([python2_found.found().to_string(), python2_found.version()]), get_option('buildtype'), ' '.join(loaders), curl_found.found(), get_option('prefix'), get_option('gcov').enabled(), get_option('tests').enabled()))
+'''.format(pkgconfigdir, bashcompletiondir, zshcompletiondir, ', '.join([python2_found.found().to_string(), python2_found.dependency().version()]), get_option('buildtype'), ' '.join(loaders), curl_found.found(), get_option('prefix'), get_option('gcov').enabled(), get_option('tests').enabled()))

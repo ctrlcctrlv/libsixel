@@ -97,7 +97,7 @@ write_png_to_file(
         }
         src = new_pixels + width * height * 3;
         dst = pixels = new_pixels;
-        status = sixel_helper_normalize_pixelformat(src,
+        status = sixel_helper_normalize_pixelformat_rgba(src,
                                                     &pixelformat,
                                                     data,
                                                     pixelformat,
@@ -170,14 +170,14 @@ write_png_to_file(
     case SIXEL_PIXELFORMAT_ARGB8888:
     case SIXEL_PIXELFORMAT_BGRA8888:
     case SIXEL_PIXELFORMAT_ABGR8888:
-        pixels = new_pixels = sixel_allocator_malloc(allocator, (size_t)(width * height * 3));
+        pixels = new_pixels = sixel_allocator_malloc(allocator, (size_t)(width * height * 4));
         if (new_pixels == NULL) {
             status = SIXEL_BAD_ALLOCATION;
             sixel_helper_set_additional_message(
                 "write_png_to_file: sixel_allocator_malloc() failed");
             goto end;
         }
-        status = sixel_helper_normalize_pixelformat(pixels,
+        status = sixel_helper_normalize_pixelformat_rgba(pixels,
                                                     &pixelformat,
                                                     data,
                                                     pixelformat,
@@ -220,7 +220,7 @@ write_png_to_file(
         goto end;
     }
     for (y = 0; y < height; ++y) {
-        rows[y] = pixels + width * 3 * y;
+        rows[y] = pixels + width * 4 * y;
     }
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png_ptr) {
@@ -234,24 +234,23 @@ write_png_to_file(
         /* TODO: get error message */
         goto end;
     }
-# if USE_SETJMP && HAVE_SETJMP
     if (setjmp(png_jmpbuf(png_ptr))) {
         status = SIXEL_PNG_ERROR;
         /* TODO: get error message */
         goto end;
     }
-# endif
+
     png_init_io(png_ptr, output_fp);
     png_set_IHDR(png_ptr, info_ptr, (png_uint_32)width, (png_uint_32)height,
-                 /* bit_depth */ 8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+                 /* bit_depth */ 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
     png_write_info(png_ptr, info_ptr);
     png_write_image(png_ptr, rows);
     png_write_end(png_ptr, NULL);
 #else
-    png_data = stbi_write_png_to_mem(pixels, width * 3,
+    png_data = stbi_write_png_to_mem(pixels, width * 4,
                                      width, height,
-                                     /* STBI_rgb */ 3, &png_len);
+                                     /* STBI_rgb */ 4, &png_len);
     if (png_data == NULL) {
         status = (SIXEL_LIBC_ERROR | (errno & 0xff));
         sixel_helper_set_additional_message("stbi_write_png_to_mem() failed.");

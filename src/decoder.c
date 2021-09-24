@@ -217,15 +217,12 @@ sixel_decoder_decode(
 {
     SIXELSTATUS status = SIXEL_FALSE;
     unsigned char *raw_data = NULL;
-    int sx;
-    int sy;
-    int raw_len;
-    int max;
-    int n;
+    unsigned int raw_len;
+    unsigned int max;
+    unsigned int n;
     FILE *input_fp = NULL;
     unsigned char *indexed_pixels = NULL;
     unsigned char *palette = NULL;
-    int ncolors;
 
     sixel_decoder_ref(decoder);
 
@@ -271,7 +268,7 @@ sixel_decoder_decode(
                 goto end;
             }
         }
-        if ((n = (int)fread(raw_data + raw_len, 1, 4096, input_fp)) <= 0) {
+        if ((n = fread(raw_data + raw_len, 1, 4096, input_fp)) <= 0) {
             break;
         }
         raw_len += n;
@@ -281,28 +278,26 @@ sixel_decoder_decode(
         fclose(input_fp);
     }
 
-    status = sixel_decode_raw(
+    sixel_info_t info;
+
+    status = sixel_decode_raw_rgba(
         raw_data,
         raw_len,
         &indexed_pixels,
-        &sx,
-        &sy,
-        &palette,
-        &ncolors,
+        &info,
         decoder->allocator);
     if (SIXEL_FAILED(status)) {
         goto end;
     }
 
-    if (sx > SIXEL_WIDTH_LIMIT || sy > SIXEL_HEIGHT_LIMIT) {
+    if (info.width > SIXEL_WIDTH_LIMIT || info.height > SIXEL_HEIGHT_LIMIT) {
         status = SIXEL_BAD_INPUT;
         goto end;
     }
 
-    status = sixel_helper_write_image_file(indexed_pixels, sx, sy, palette,
-                                           SIXEL_PIXELFORMAT_PAL8,
-                                           decoder->output,
-                                           SIXEL_FORMAT_PNG,
+    status = sixel_helper_write_image_file(indexed_pixels, info.width, info.height,
+                                           palette, SIXEL_PIXELFORMAT_RGBA8888,
+                                           decoder->output, SIXEL_FORMAT_PNG,
                                            decoder->allocator);
 
     if (SIXEL_FAILED(status)) {

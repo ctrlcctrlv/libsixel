@@ -906,11 +906,11 @@ sixel_encode_dither(
             status = SIXEL_BAD_ALLOCATION;
             goto end;
         }
-        status = sixel_helper_normalize_pixelformat(paletted_pixels,
-                                                    &dither->pixelformat,
-                                                    pixels,
-                                                    dither->pixelformat,
-                                                    width, height);
+        status = sixel_helper_normalize_pixelformat_rgb(paletted_pixels,
+                                                        &dither->pixelformat,
+                                                        pixels,
+                                                        dither->pixelformat,
+                                                        width, height);
         if (SIXEL_FAILED(status)) {
             goto end;
         }
@@ -1447,11 +1447,11 @@ sixel_encode_highcolor(
         if (normalized_pixels == NULL) {
             goto error;
         }
-        status = sixel_helper_normalize_pixelformat(normalized_pixels,
-                                                    &dither->pixelformat,
-                                                    pixels,
-                                                    dither->pixelformat,
-                                                    width, height);
+        status = sixel_helper_normalize_pixelformat_rgb(normalized_pixels,
+                                                        &dither->pixelformat,
+                                                        pixels,
+                                                        dither->pixelformat,
+                                                        width, height);
         if (SIXEL_FAILED(status)) {
             goto error;
         }

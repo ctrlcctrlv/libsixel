@@ -388,14 +388,16 @@ load_image_callback_for_palette(
         }
 
         /* create adaptive palette from given frame object */
-        status = sixel_dither_initialize(callback_context->dither,
-                                         sixel_frame_get_pixels(frame),
-                                         sixel_frame_get_width(frame),
-                                         sixel_frame_get_height(frame),
-                                         sixel_frame_get_pixelformat(frame),
-                                         SIXEL_LARGE_NORM,
-                                         SIXEL_REP_CENTER_BOX,
-                                         SIXEL_QUALITY_HIGH);
+        status = sixel_dither_init(callback_context->dither,
+                                   sixel_frame_get_pixels(frame),
+                                   sixel_frame_get_width(frame) *
+                                    sixel_frame_get_height(frame),
+                                   sixel_frame_get_width(frame),
+                                   sixel_frame_get_height(frame),
+                                   sixel_frame_get_pixelformat(frame),
+                                   SIXEL_LARGE_NORM,
+                                   SIXEL_REP_CENTER_BOX,
+                                   SIXEL_QUALITY_HIGH);
         if (SIXEL_FAILED(status)) {
             sixel_dither_unref(callback_context->dither);
             goto end;
@@ -550,14 +552,16 @@ sixel_encoder_prepare_palette(
         goto end;
     }
 
-    status = sixel_dither_initialize(*dither,
-                                     sixel_frame_get_pixels(frame),
-                                     sixel_frame_get_width(frame),
-                                     sixel_frame_get_height(frame),
-                                     sixel_frame_get_pixelformat(frame),
-                                     encoder->method_for_largest,
-                                     encoder->method_for_rep,
-                                     encoder->quality_mode);
+    status = sixel_dither_init(*dither,
+                               sixel_frame_get_pixels(frame),
+                               sixel_frame_get_width(frame) *
+                                sixel_frame_get_height(frame),
+                               sixel_frame_get_width(frame),
+                               sixel_frame_get_height(frame),
+                               sixel_frame_get_pixelformat(frame),
+                               encoder->method_for_largest,
+                               encoder->method_for_rep,
+                               encoder->quality_mode);
     if (SIXEL_FAILED(status)) {
         goto end;
     }
@@ -781,13 +785,14 @@ sixel_encoder_output_without_macro(
     }
 
     pixbuf = sixel_frame_get_pixels(frame);
-    memcpy(p, pixbuf, (size_t)(width * height * depth));
+    int len = sixel_frame_get_length(frame);
+    memcpy(p, pixbuf, (size_t)len);
 
     if (encoder->cancel_flag && *encoder->cancel_flag) {
         goto end;
     }
 
-    status = sixel_encode(p, width, height, depth, dither, output);
+    status = sixel_encode(p, len, width, height, depth, dither, output);
     if (status != SIXEL_OK) {
         goto end;
     }
@@ -814,9 +819,6 @@ sixel_encoder_output_with_macro(
     int lag = 0;
     struct timespec tv;
     clock_t start;
-    unsigned char *pixbuf;
-    int width;
-    int height;
     int delay;
 
     start = clock();
@@ -840,10 +842,11 @@ sixel_encoder_output_with_macro(
             goto end;
         }
 
-        pixbuf = sixel_frame_get_pixels(frame),
-        width = sixel_frame_get_width(frame),
-        height = sixel_frame_get_height(frame),
-        status = sixel_encode(pixbuf, width, height, /* unused */ 3, dither, output);
+        unsigned char* pixbuf = sixel_frame_get_pixels(frame);
+        int width = sixel_frame_get_width(frame);
+        int height = sixel_frame_get_height(frame);
+        int len = sixel_frame_get_length(frame);
+        status = sixel_encode(pixbuf, len, width, height, /* unused */ 3, dither, output);
         if (SIXEL_FAILED(status)) {
             goto end;
         }
@@ -1734,8 +1737,8 @@ end:
 }
 
 
-/* encode specified pixel data to SIXEL format
- * output to encoder->outfd */
+/* this function cannot be used safely, since it has no indication of how
+ * many bytes are viable. it now always returns failure. remove in 1.12. */
 SIXELAPI SIXELSTATUS
 sixel_encoder_encode_bytes(
     sixel_encoder_t     /* in */    *encoder,
@@ -1746,9 +1749,35 @@ sixel_encoder_encode_bytes(
     unsigned char       /* in */    *palette,
     int                 /* in */    ncolors)
 {
+    (void)encoder;
+    (void)bytes;
+    (void)width;
+    (void)height;
+    (void)pixelformat;
+    (void)palette;
+    (void)ncolors;
+    fprintf(stderr, "sixel_encoder_encode_bytes() has been disabled, as it"
+            " is unsafe.\nuse sixel_encoder_encode_buffer() instead.\n");
+    return SIXEL_FALSE;
+}
+
+/* encode specified pixel data to SIXEL format
+ * output to encoder->outfd */
+SIXELAPI SIXELSTATUS
+sixel_encoder_encode_buffer(
+    sixel_encoder_t     /* in */    *encoder,
+    unsigned char       /* in */    *bytes,
+    int                 /* in */    len,
+    int                 /* in */    width,
+    int                 /* in */    height,
+    int                 /* in */    pixelformat,
+    unsigned char       /* in */    *palette,
+    int                 /* in */    ncolors)
+{
     SIXELSTATUS status = SIXEL_FALSE;
     sixel_frame_t *frame;
 
+    (void)len; // FIXME
     if (encoder == NULL || bytes == NULL) {
         status = SIXEL_BAD_ARGUMENT;
         goto end;

@@ -1,3 +1,9 @@
+* libsixel 1.11 (not yet released)
+ * Resolve CVE-2020-36120 by marking `sixel_encoder_encode_bytes()` as
+   deprecated and unsafe. Replace it with `sixel_encoder_encode_buffer()`,
+   which takes an additional size argument, and can be used safely. The
+   former function will be removed in 1.12.
+
 * libsixel 1.10.2 (2021-10-08)
  * Update python bindings to use python3. Python 3.9 is preferred. File issues
    if bugs are found in python 3.6-8. Thanks, @wsluser

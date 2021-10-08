@@ -176,6 +176,7 @@ expand_rgb(unsigned char *dst,
     int src_offset;
     unsigned char r, g, b;
 
+    fprintf(stderr, "WxH: %dx%d pf: %d depth: %d\n", width, height, pixelformat, depth);
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
             src_offset = depth * (y * width + x);
@@ -259,6 +260,7 @@ sixel_helper_normalize_pixelformat(
     unsigned char       /* out */ *dst,             /* destination buffer */
     int                 /* out */ *dst_pixelformat, /* converted pixelformat */
     unsigned char const /* in */  *src,             /* source pixels */
+    int                 /* in */  len,              /* size of source in bytes */
     int                 /* in */  src_pixelformat,  /* format of source image */
     int                 /* in */  width,            /* width of source image */
     int                 /* in */  height)           /* height of source image */
@@ -267,6 +269,9 @@ sixel_helper_normalize_pixelformat(
 
     switch (src_pixelformat) {
     case SIXEL_PIXELFORMAT_G8:
+        if (len < width * height) {
+            return SIXEL_FALSE;
+        }
         expand_rgb(dst, src, width, height, src_pixelformat, 1);
         *dst_pixelformat = SIXEL_PIXELFORMAT_RGB888;
         break;
@@ -276,11 +281,17 @@ sixel_helper_normalize_pixelformat(
     case SIXEL_PIXELFORMAT_BGR555:
     case SIXEL_PIXELFORMAT_GA88:
     case SIXEL_PIXELFORMAT_AG88:
+        if (len < width * height * 2) {
+            return SIXEL_FALSE;
+        }
         expand_rgb(dst, src, width, height, src_pixelformat, 2);
         *dst_pixelformat = SIXEL_PIXELFORMAT_RGB888;
         break;
     case SIXEL_PIXELFORMAT_RGB888:
     case SIXEL_PIXELFORMAT_BGR888:
+        if (len < width * height * 3) {
+            return SIXEL_FALSE;
+        }
         expand_rgb(dst, src, width, height, src_pixelformat, 3);
         *dst_pixelformat = SIXEL_PIXELFORMAT_RGB888;
         break;
@@ -288,6 +299,9 @@ sixel_helper_normalize_pixelformat(
     case SIXEL_PIXELFORMAT_ARGB8888:
     case SIXEL_PIXELFORMAT_BGRA8888:
     case SIXEL_PIXELFORMAT_ABGR8888:
+        if (len < width * height * 4) {
+            return SIXEL_FALSE;
+        }
         expand_rgb(dst, src, width, height, src_pixelformat, 4);
         *dst_pixelformat = SIXEL_PIXELFORMAT_RGB888;
         break;

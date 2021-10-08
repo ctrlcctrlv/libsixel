@@ -28,6 +28,7 @@
 struct sixel_frame {
     unsigned int ref;               /* reference counter */
     unsigned char *pixels;          /* loaded pixel data */
+    int len;                        /* loaded content bytes */
     unsigned char *palette;         /* loaded palette data */
     int width;                      /* frame width */
     int height;                     /* frame height */

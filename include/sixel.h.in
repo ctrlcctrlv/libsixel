@@ -31,6 +31,8 @@
 # define SIXELAPI
 #endif
 
+#define SIXELDEPRECATED __attribute__ ((deprecated))
+
 #define LIBSIXEL_VERSION "@PACKAGE_VERSION@"
 #define PACKAGE_VERSION LIBSIXEL_VERSION
 #define LIBSIXEL_ABI_VERSION "@LS_LTVERSION@"
@@ -708,10 +710,25 @@ SIXELAPI void
 sixel_dither_unref(sixel_dither_t *dither); /* dither context object */
 
 /* initialize internal palette from specified pixel buffer */
-SIXELAPI SIXELSTATUS
+/* this function is fundamentally unsafe. it has been disabled for
+ * libsixel 1.11, and will be removed entirely for libsixel 1.12.
+ * use sixel_dither_init() instead. */
+SIXELAPI SIXELSTATUS SIXELDEPRECATED
 sixel_dither_initialize(
     sixel_dither_t *dither,                    /* dither context object */
     unsigned char /* in */ *data,              /* sample image */
+    int           /* in */ width,              /* image width */
+    int           /* in */ height,             /* image height */
+    int           /* in */ pixelformat,        /* one of enum pixelFormat */
+    int           /* in */ method_for_largest, /* method for finding the largest dimension */
+    int           /* in */ method_for_rep,     /* method for choosing a color from the box */
+    int           /* in */ quality_mode);      /* quality of histogram processing */
+
+SIXELAPI SIXELSTATUS
+sixel_dither_init(
+    sixel_dither_t *dither,                    /* dither context object */
+    unsigned char /* in */ *data,              /* sample image */
+    int           /* in */ len,                /* number of bytes in data */
     int           /* in */ width,              /* image width */
     int           /* in */ height,             /* image height */
     int           /* in */ pixelformat,        /* one of enum pixelFormat */
@@ -796,9 +813,10 @@ extern "C" {
 SIXELAPI SIXELSTATUS
 sixel_encode(
     unsigned char  /* in */ *pixels,     /* pixel bytes */
-    int            /* in */  width,      /* image width */
-    int            /* in */  height,     /* image height */
-    int            /* in */  depth,      /* color depth: now unused */
+    int            /* in */ len,         /* source size in bytes */
+    int            /* in */ width,       /* image width */
+    int            /* in */ height,      /* image height */
+    int            /* in */ depth,       /* color depth: now unused */
     sixel_dither_t /* in */ *dither,     /* dither context */
     sixel_output_t /* in */ *context);   /* output context */
 
@@ -861,6 +879,7 @@ sixel_helper_normalize_pixelformat(
     unsigned char       /* out */ *dst,             /* destination buffer */
     int                 /* out */ *dst_pixelformat, /* converted pixelformat */
     unsigned char const /* in */  *src,             /* source pixels */
+    int                 /* in */  len,              /* size of src in bytes */
     int                 /* in */  src_pixelformat,  /* format of source image */
     int                 /* in */  width,            /* width of source image */
     int                 /* in */  height            /* height of source image */
@@ -952,6 +971,10 @@ sixel_frame_init(
 /* get pixels */
 SIXELAPI unsigned char *
 sixel_frame_get_pixels(sixel_frame_t /* in */ *frame);  /* frame object */
+
+/* get content length in bytes */
+SIXELAPI int
+sixel_frame_get_length(sixel_frame_t /* in */ *frame);  /* frame object */
 
 /* get palette */
 SIXELAPI unsigned char *
@@ -1100,8 +1123,12 @@ sixel_encoder_encode(
     char const      /* in */ *filename);
 
 /* encode specified pixel data to SIXEL format
- * output to encoder->outfd */
-SIXELAPI SIXELSTATUS
+ * output to encoder->outfd
+ * this function is *unsafe*! do not use it in new code! it will be removed
+ * in libsixel 1.12, and no longer works as of libsixel 1.11.
+ * use sixel_encoder_encode_buffer() instead.
+ **/
+SIXELAPI SIXELSTATUS SIXELDEPRECATED
 sixel_encoder_encode_bytes(
     sixel_encoder_t     /* in */    *encoder,
     unsigned char       /* in */    *bytes,
@@ -1111,6 +1138,19 @@ sixel_encoder_encode_bytes(
     unsigned char       /* in */    *palette,
     int                 /* in */    ncolors);
 
+/* encode specified pixel data having len bytes to SIXEL format
+ * output to encoder->outfd
+ **/
+SIXELAPI SIXELSTATUS
+sixel_encoder_encode_buffer(
+    sixel_encoder_t     /* in */    *encoder,
+    unsigned char       /* in */    *bytes,
+    int                 /* in */    len,
+    int                 /* in */    width,
+    int                 /* in */    height,
+    int                 /* in */    pixelformat,
+    unsigned char       /* in */    *palette,
+    int                 /* in */    ncolors);
 #ifdef __cplusplus
 }
 #endif

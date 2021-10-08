@@ -39,6 +39,7 @@ c_args = [
   '-Wunused-function',
   '-Wunused-but-set-variable',
   '-Bsymbolic',
+  '-g',
 ]
 
 foreach a : c_args

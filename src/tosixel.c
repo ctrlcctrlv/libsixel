@@ -881,6 +881,7 @@ sixel_encode_body_ormode(
 static SIXELSTATUS
 sixel_encode_dither(
     unsigned char   /* in */ *pixels,   /* pixel bytes to be encoded */
+    int             /* in */ len,       /* source size in bytes */
     int             /* in */ width,     /* width of source image */
     int             /* in */ height,    /* height of source image */
     sixel_dither_t  /* in */ *dither,   /* dither context */
@@ -909,6 +910,7 @@ sixel_encode_dither(
         status = sixel_helper_normalize_pixelformat(paletted_pixels,
                                                     &dither->pixelformat,
                                                     pixels,
+                                                    len,
                                                     dither->pixelformat,
                                                     width, height);
         if (SIXEL_FAILED(status)) {
@@ -924,7 +926,7 @@ sixel_encode_dither(
         break;
     default:
         /* apply palette */
-        paletted_pixels = sixel_dither_apply_palette(dither, pixels,
+        paletted_pixels = sixel_dither_apply_palette(dither, pixels, len,
                                                      width, height);
         if (paletted_pixels == NULL) {
             status = SIXEL_RUNTIME_ERROR;
@@ -1410,7 +1412,7 @@ sixel_apply_15bpp_dither(
 
 static SIXELSTATUS
 sixel_encode_highcolor(
-        unsigned char *pixels, int width, int height,
+        unsigned char *pixels, int len, int width, int height,
         sixel_dither_t *dither, sixel_output_t *output
         )
 {
@@ -1450,6 +1452,7 @@ sixel_encode_highcolor(
         status = sixel_helper_normalize_pixelformat(normalized_pixels,
                                                     &dither->pixelformat,
                                                     pixels,
+                                                    len,
                                                     dither->pixelformat,
                                                     width, height);
         if (SIXEL_FAILED(status)) {
@@ -1622,6 +1625,7 @@ error:
 SIXELAPI SIXELSTATUS
 sixel_encode(
     unsigned char  /* in */ *pixels,   /* pixel bytes */
+    int            /* in */ len,       /* source size in bytes */
     int            /* in */ width,     /* image width */
     int            /* in */ height,    /* image height */
     int const      /* in */ depth,     /* color depth */
@@ -1653,10 +1657,10 @@ sixel_encode(
     }
 
     if (dither->quality_mode == SIXEL_QUALITY_HIGHCOLOR) {
-        status = sixel_encode_highcolor(pixels, width, height,
+        status = sixel_encode_highcolor(pixels, len, width, height,
                                         dither, output);
     } else {
-        status = sixel_encode_dither(pixels, width, height,
+        status = sixel_encode_dither(pixels, len, width, height,
                                      dither, output);
     }
 

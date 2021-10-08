@@ -649,6 +649,7 @@ load_gif(
         frame->frame_no = 0;
 
         s.img_buffer = s.img_buffer_original;
+        // FIXME verify size is sufficient for headers
         status = gif_load_header(&s, &g);
         if (status != SIXEL_OK) {
             goto end;
@@ -672,6 +673,7 @@ load_gif(
                 goto end;
             }
 
+            // FIXME drop header/footer length from size
             status = fnp.fn(frame, context);
             if (status != SIXEL_OK) {
                 goto end;

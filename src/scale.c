@@ -325,9 +325,10 @@ sixel_helper_scale_image(
         if (new_src == NULL) {
             return (-1);
         }
+        int len = srcw * srch * depth;
         nret = sixel_helper_normalize_pixelformat(new_src,
                                                   &new_pixelformat,
-                                                  src, pixelformat,
+                                                  src, len, pixelformat,
                                                   srcw, srch);
         if (nret != 0) {
             sixel_allocator_free(allocator, new_src);

@@ -178,6 +178,7 @@ sixel_frame_init(
     frame->pixelformat = pixelformat;
     frame->palette = palette;
     frame->ncolors = ncolors;
+    frame->len = 0;
 
     status = SIXEL_OK;
 
@@ -193,6 +194,14 @@ SIXELAPI unsigned char *
 sixel_frame_get_pixels(sixel_frame_t /* in */ *frame)  /* frame object */
 {
     return frame->pixels;
+}
+
+
+/* get content length */
+SIXELAPI int
+sixel_frame_get_length(sixel_frame_t /* in */ *frame)  /* frame object */
+{
+    return frame->len;
 }
 
 
@@ -418,6 +427,7 @@ sixel_frame_convert_to_rgb888(sixel_frame_t /*in */ *frame)
         status = sixel_helper_normalize_pixelformat(src,
                                                     &frame->pixelformat,
                                                     frame->pixels,
+                                                    size,
                                                     frame->pixelformat,
                                                     frame->width,
                                                     frame->height);
@@ -477,6 +487,7 @@ sixel_frame_convert_to_rgb888(sixel_frame_t /*in */ *frame)
         status = sixel_helper_normalize_pixelformat(normalized_pixels,
                                                     &frame->pixelformat,
                                                     frame->pixels,
+                                                    frame->len,
                                                     frame->pixelformat,
                                                     frame->width,
                                                     frame->height);
@@ -704,6 +715,7 @@ sixel_frame_clip(
         status = sixel_helper_normalize_pixelformat(normalized_pixels,
                                                     &frame->pixelformat,
                                                     frame->pixels,
+                                                    frame->len,
                                                     frame->pixelformat,
                                                     frame->width,
                                                     frame->height);

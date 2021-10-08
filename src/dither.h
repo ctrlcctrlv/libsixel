@@ -54,6 +54,7 @@ extern "C" {
 sixel_index_t *
 sixel_dither_apply_palette(struct sixel_dither /* in */ *dither,
                            unsigned char       /* in */ *pixels,
+                           int                 /* in */ len,
                            int                 /* in */ width,
                            int                 /* in */ height);
 

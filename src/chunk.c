@@ -285,7 +285,8 @@ static SIXELSTATUS
 sixel_chunk_from_url(
     char const      /* in */ *url,
     sixel_chunk_t   /* in */ *pchunk,
-    int             /* in */ finsecure)
+    int             /* in */ finsecure,
+    size_t*         /* out */ len)
 {
     SIXELSTATUS status = SIXEL_FALSE;
 # ifdef HAVE_LIBCURL
@@ -350,6 +351,17 @@ sixel_chunk_from_url(
         sixel_helper_set_additional_message("curl_easy_perform() failed.");
         goto end;
     }
+    double cl;
+    code = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl);
+    if (code != CURLE_OK) {
+        sixel_helper_set_additional_message("coudln't get content length.");
+        goto end;
+    }
+    if (cl <= 0 || cl > SIZE_MAX) {
+        sixel_helper_set_additional_message("bad content length.");
+        goto end;
+    }
+    *len = cl;
 
     status = SIXEL_OK;
 # else
@@ -361,6 +373,7 @@ sixel_chunk_from_url(
         "configure this program with --with-libcurl "
         "option at compile time.\n");
     status = SIXEL_NOT_IMPLEMENTED;
+    *len = 0;
     goto end;
 # endif  /* HAVE_LIBCURL */
 
@@ -418,8 +431,9 @@ sixel_chunk_new(
 
     sixel_allocator_ref(allocator);
 
+    size_t len;
     if (filename != NULL && strstr(filename, "://")) {
-        status = sixel_chunk_from_url(filename, *ppchunk, finsecure);
+        status = sixel_chunk_from_url(filename, *ppchunk, finsecure, &len);
     } else {
         status = sixel_chunk_from_file(filename, *ppchunk, cancel_flag);
     }

@@ -100,6 +100,7 @@ write_png_to_file(
         status = sixel_helper_normalize_pixelformat(src,
                                                     &pixelformat,
                                                     data,
+                                                    width * height * 3,
                                                     pixelformat,
                                                     width, height);
         if (SIXEL_FAILED(status)) {
@@ -180,6 +181,7 @@ write_png_to_file(
         status = sixel_helper_normalize_pixelformat(pixels,
                                                     &pixelformat,
                                                     data,
+                                                    width * height * 3,
                                                     pixelformat,
                                                     width, height);
         if (SIXEL_FAILED(status)) {

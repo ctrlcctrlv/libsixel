@@ -514,6 +514,32 @@ sixel_dither_initialize(
     int             /* in */ method_for_rep,
     int             /* in */ quality_mode)
 {
+    (void)dither;
+    (void)data;
+    (void)width;
+    (void)height;
+    (void)pixelformat;
+    (void)method_for_largest;
+    (void)method_for_rep;
+    (void)quality_mode;
+    fprintf(stderr, "sixel_dither_initialize() has been disabled, as it"
+            " is unsafe.\nuse sixel_dither_init() instead.\n");
+    return SIXEL_FALSE;
+}
+
+
+SIXELAPI SIXELSTATUS
+sixel_dither_init(
+    sixel_dither_t  /* in */ *dither,
+    unsigned char   /* in */ *data,
+    int             /* in */ len,
+    int             /* in */ width,
+    int             /* in */ height,
+    int             /* in */ pixelformat,
+    int             /* in */ method_for_largest,
+    int             /* in */ method_for_rep,
+    int             /* in */ quality_mode)
+{
     unsigned char *buf = NULL;
     unsigned char *normalized_pixels = NULL;
     unsigned char *input_pixels;
@@ -551,6 +577,7 @@ sixel_dither_initialize(
             normalized_pixels,
             &pixelformat,
             data,
+            len,
             pixelformat,
             width,
             height);
@@ -719,6 +746,7 @@ SIXELAPI sixel_index_t *
 sixel_dither_apply_palette(
     sixel_dither_t  /* in */ *dither,
     unsigned char   /* in */ *pixels,
+    int             /* in */ len,
     int             /* in */ width,
     int             /* in */ height)
 {
@@ -779,7 +807,7 @@ sixel_dither_apply_palette(
         }
         status = sixel_helper_normalize_pixelformat(normalized_pixels,
                                                     &dither->pixelformat,
-                                                    pixels, dither->pixelformat,
+                                                    pixels, len, dither->pixelformat,
                                                     width, height);
         if (SIXEL_FAILED(status)) {
             goto end;

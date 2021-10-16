@@ -262,7 +262,6 @@ load_png(unsigned char      /* out */ **result,
          int                /* out */ *transparent,
          sixel_allocator_t  /* in */  *allocator)
 {
-fprintf(stderr, "SIZE: %d\n", size);
     SIXELSTATUS status;
     sixel_chunk_t read_chunk;
     png_uint_32 bitdepth;
@@ -623,7 +622,6 @@ load_sixel(unsigned char        /* out */ **result,
     int colors;
     int i;
 
-fprintf(stderr, "SIZE: %d\n", size);
     /* sixel */
     status = sixel_decode_raw(buffer, size,
                               &p, psx, psy,

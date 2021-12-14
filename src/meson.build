@@ -21,11 +21,17 @@ sources = [
   'writer.c'
 ]
 
-libsixel = both_libraries('sixel',
+libsixel = library('sixel',
   sources,
   include_directories: [inc, inc_config],
   dependencies: libsixel_deps,
   version: '1.0.0',
   install: true)
+
+libsixel_dep = declare_dependency(
+  link_with: libsixel,
+  include_directories: inc,
+)
+
 pkgconfig = import('pkgconfig')
-pkgconfig.generate(libsixel, name: 'libsixel', description: pkg_description, libraries: '-lsixel')
+pkgconfig.generate(libsixel, name: 'libsixel', description: pkg_description)

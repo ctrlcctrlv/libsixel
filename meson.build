@@ -77,7 +77,6 @@ foreach a : needed_headers
 endforeach
 
 conf_data.set10('HAVE_SYS_SELECT_H', cc.has_header('sys/select.h'))
-conf_data.set10('HAVE_SYS_SIGNAL_H', cc.has_header('sys/signal.h'))
 conf_data.set10('HAVE_SYS_IOCTL_H', cc.has_header('sys/ioctl.h'))
 conf_data.set10('HAVE_TERMIOS_H', cc.has_header('termios.h'))
 

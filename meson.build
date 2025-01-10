@@ -1,4 +1,4 @@
-project('libsixel', ['c'], version: '1.10.3', license: 'MIT', default_options: ['buildtype=release', 'c_std=c99', 'warning_level=3'])
+project('libsixel', ['c'], version: '1.10.3', license: 'MIT', default_options: ['buildtype=release', 'c_std=c99', 'warning_level=3'], meson_version: '>= 0.50.0')
 
 datadir = get_option('datadir')
 if (get_option('bashcompletiondir') == '')

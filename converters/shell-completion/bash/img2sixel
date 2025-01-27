@@ -1,6 +1,14 @@
 # bash completion for img2sixel
 
-have img2sixel &&
+_libsixel_command_exist() {
+    if declare -F _comp_have_command > /dev/null; then
+        _comp_have_command "$1"
+    else
+        have "$1"
+    fi
+}
+
+_libsixel_command_exist img2sixel &&
 _img2sixel()
 {
     local cur prev
